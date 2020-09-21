@@ -1,5 +1,13 @@
-Laminas API Tools Skeleton Application
+REST Api Job Queue Application implementing RabbitMQ
 ======================================
+
+## Introduction
+
+This is a REST Api Job Queue Application application using the Laminas(Zend Framework) MVC layer and module
+systems. This application was designed to test my knowledge of web technologies and assess my ability to
+create robust PHP web applications with attention to software architecture​ and security.
+
+It sends shell commands to your linux through PHP. It creates a queue of commands that can be monitored.
 
 Requirements
 ------------
@@ -8,40 +16,7 @@ Please see the [composer.json](composer.json) file.
 
 Installation
 ------------
-
-### Via release tarball
-
-Grab the latest release via the [Laminas API Tools website](https://api-tools.getlaminas.org/)
-and/or the [releases page](https://github.com/laminas-api-tools/api-tools-skeleton/releases); each release
-has distribution tarballs and zipballs available.
-
-Untar it:
-
-```bash
-$ tar xzf api-tools-skeleton-{version}.tgz
-```
-
-(Where `{version}` is the version you downloaded.)
-
-Or unzip, if you chose the zipball:
-
-```bash
-$ unzip api-tools-skeleton-{version}.zip
-```
-
-(Where `{version}` is the version you downloaded.)
-
-### Via Composer (create-project)
-
-You can use the `create-project` command from [Composer](https://getcomposer.org/)
-to create the project in one go (you need to install [composer](https://getcomposer.org/doc/00-intro.md#downloading-the-composer-executable)):
-
-```bash
-$ curl -s https://getcomposer.org/installer | php -- --filename=composer
-$ composer create-project -sdev laminas-api-tools/api-tools-skeleton path/to/install
-```
-
-### Via Git (clone)
+### Git (clone)
 
 First, clone the repository:
 
@@ -50,6 +25,8 @@ First, clone the repository:
 $ cd path/to/install
 ```
 
+### Composer
+
 At this point, you need to use [Composer](https://getcomposer.org/) to install
 dependencies. Assuming you already have Composer:
 
@@ -57,16 +34,67 @@ dependencies. Assuming you already have Composer:
 $ composer install
 ```
 
-### All methods
+###Installing RabbitMQ
 
-Once you have the basic installation, you need to put it in development mode:
-
+Make sure the file RabbitMQ.sh on root directory is with execution privilege:
 ```bash
-$ cd path/to/install
-$ composer development-enable
+$ chmod +x ./RabbitMQ.sh
 ```
 
-Now, fire it up! Do one of the following:
+At this point, you need to use [Docker](https://docs.docker.com/engine/install/) to install RabbitMQ. Assuming you already have Docker, there's a bash script to help your way:
+```bash
+$ sudo ./RabbitMQ.sh
+```
+
+### Importing MySQL database
+
+We need to create a new database. This is where the contents of the 'db/db.sql' file will be imported.
+
+First, log in to the database as root or another user with sufficient privileges to create new databases:
+```bash
+$ mysql -u root -p
+```
+
+This will bring you into the MySQL shell prompt. 
+Next, create a new database with the following command. In this example, the new database is called exchange:
+```bash
+CREATE DATABASE exchange;
+```
+You’ll see this output confirming that it was created.
+
+```output
+Query OK, 1 row affected (0.00 sec)
+```
+Then exit the MySQL shell by pressing CTRL+D. 
+From the regular command line, you can import the dump file with the following command:
+```bash
+$ mysql -u username -p newdatabase < path/to/chatbot/db/db.sql
+```
+username: is the username you can log in to the database with
+newdatabase: is the name of the freshly created database
+db.sql: is the data dump file to be imported, located in the current directory
+
+
+### Environment-specific application configuration
+
+Now we need to setup 'config/autoload/global.php' (or 'config/autoload/local.php', recommended) file database data:
+
+'database' => 'jobqueue', #mysql database name;
+'hostname' => '127.0.0.1', #host address to access your mysql server
+'username' => 'root', #username to access your Mysql database
+'password' => 'myPassword', #password to access your Mysql database
+
+and RabbitMQ data:
+
+"RABBITMQ_HOST" => "127.0.0.1", #host address to access your RabbitMQ server
+"RABBITMQ_PORT" => 5672, #port address to access your RabbitMQ server
+"RABBITMQ_USERNAME" => "root", #username to access your RabbitMQ server
+"RABBITMQ_PASSWORD" => "myPassword", #password to access your RabbitMQ server
+"RABBITMQ_QUEUE_NAME" => "job_queue" #name of your queue
+
+### All set
+
+Once you have the basic installation, you need to do one of the following:
 
 - Create a vhost in your web server that points the DocumentRoot to the
   `public/` directory of the project
@@ -86,6 +114,19 @@ You can then visit the site at http://localhost:8080/ - which will bring up a
 welcome page and the ability to visit the dashboard in order to create and
 inspect your APIs.
 
+If you click "Documentation" button, and click "Ver. 1" afterwards, you will get all documentation you need for interacting with the API.
+
+There is a Postman file for helping with your API tests.
+
+After you get enough jobs on your app, it's time to work the queue. You just have to execute the command:
+```bash
+$ php worker.php NAME_OF_WORKER
+```
+changing NAME_OF_WORKER by the name of the server that you are starting.
+It's a nice idea to have a different name for each server, to keep control of which server is running which job.
+
+You can then visit the RabbitMQ admin page at http://localhost:15672/ . There you can access lots of informations about your queues, including current average processing time.
+
 ### NOTE ABOUT USING APACHE
 
 Apache forbids the character sequences `%2F` and `%5C` in URI paths. However, the Laminas API Tools Admin
@@ -103,7 +144,7 @@ This change will need to be made in your server's vhost file (it cannot be added
 
 **Disable all opcode caches when running the admin!**
 
-The admin cannot and will not run correctly when an opcode cache, such as APC or
+The Laminas API Tools Admin cannot and will not run correctly when an opcode cache, such as APC or
 OpCache, is enabled. Laminas API Tools does not use a database to store configuration;
 instead, it uses PHP configuration files. Opcode caches will cache these files
 on first load, leading to inconsistencies as you write to them, and will
@@ -112,8 +153,12 @@ typically lead to a state where the admin API and code become unusable.
 The admin is a **development** tool, and intended for use a development
 environment. As such, you should likely disable opcode caching, regardless.
 
-When you are ready to deploy your API to **production**, however, you can
-disable development mode, thus disabling the admin interface, and safely run an
+When you are ready to deploy this API to **production**, however, you can
+disable development mode with command:
+```bash
+composer development-disable
+```
+thus disabling the admin interface, and safely run an
 opcode cache again. Doing so is recommended for production due to the tremendous
 performance benefits opcode caches provide.
 
@@ -132,59 +177,6 @@ reasonable error log settings in place. For the built-in PHP web server, errors 
 the console itself; otherwise, ensure you have an error log file specified in your configuration.
 
 `display_errors` should *never* be enabled in production, regardless.
-
-### Vagrant
-
-If you prefer to develop with Vagrant, there is a basic vagrant recipe included with this project.
-
-This recipe assumes that you already have Vagrant installed. The virtual machine will try to use localhost:8080 by
-default, so if you already have a server on this port of your host machine, you need to shut down the conflicting
-server first, or if you know how, you can reconfigure the ports in Vagrantfile.
-
-Assuming you have Vagrant installed and assuming you have no port conflicts, you can bring up the Vagrant machine
-with the standard `up` command:
-
-```bash
-$ vagrant up
-```
-
-When the machine comes up, you can ssh to it with the standard ssh forward agent:
-
-```bash
-$ vagrant ssh
-```
-
-The web root is inside the shared directory, which is at `/var/www`; this is
-also the home directory for the vagrant issue, which will be the initial
-directory you land in once you connect via SSH.
-
-The image installs composer during provisioning, meaning you can use it to
-install and update dependencies:
-
-```bash
-# Install dependencies:
-$ vagrant ssh -c 'composer install'
-# Update dependencies:
-$ vagrant ssh -c 'composer update'
-```
-
-You can also manipulate development mode:
-
-```bash
-$ vagrant ssh -c 'composer development-enable'
-$ vagrant ssh -c 'composer development-disable'
-$ vagrant ssh -c 'composer development-status'
-```
-
-> #### Vagrant and VirtualBox
->
-> The vagrant image is based on `bento/ubuntu-16.04`. If you are using VirtualBox as
-> a provider, you will need:
->
-> - Vagrant 1.8.5 or later
-> - VirtualBox 5.0.26 or later
-
-For vagrant documentation, please refer to [vagrantup.com](https://www.vagrantup.com/)
 
 ### Docker
 
@@ -252,9 +244,3 @@ $ composer test
 ```
 
 
-Installing RabbitMQ
-
-Make sure the file RabbitMQ.sh on root directory is with execution privilege:
-```bash
-chmod +x ./RabbitMQ.sh
-```

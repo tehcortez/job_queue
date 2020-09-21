@@ -1,0 +1,301 @@
+{
+	"info": {
+		"_postman_id": "bf1b1fb6-1bad-4db9-8a68-e4e2f91d3c86",
+		"name": "jobQueue",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "GET submitters list",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"accept": true,
+					"accept-encoding": true,
+					"connection": true,
+					"user-agent": true,
+					"host": true
+				}
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "{{url}}/submitter",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"submitter"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get One Submitter",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/submitter/2",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"submitter",
+						"2"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "save new Submitter",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"connection": true,
+					"accept-encoding": true,
+					"user-agent": true,
+					"content-type": true,
+					"host": true
+				}
+			},
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\":\"Richard\",\n    \"email\":\"richard@gmail.com\"\n}"
+				},
+				"url": {
+					"raw": "{{url}}/submitter",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"submitter"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update Submiter",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"connection": true,
+					"accept-encoding": true,
+					"user-agent": true,
+					"content-type": true,
+					"host": true
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\":\"Paul\",\n    \"email\":\"paul@gmail.com\"\n}"
+				},
+				"url": {
+					"raw": "{{url}}/submitter/5",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"submitter",
+						"5"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete Submiter",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"accept-encoding": true,
+					"connection": true,
+					"content-type": true,
+					"host": true,
+					"user-agent": true
+				}
+			},
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/submitter/8",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"submitter",
+						"8"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET jobs list",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"accept": true,
+					"accept-encoding": true,
+					"connection": true,
+					"user-agent": true,
+					"host": true
+				}
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "{{url}}/job",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"job"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get One Job",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/job/1",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"job",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "save new Job",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"connection": true,
+					"accept-encoding": true,
+					"user-agent": true,
+					"content-type": true,
+					"host": true
+				}
+			},
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"submitter_id\":\"1\",\n    \"command\":\"sleep 3\",\n    \"priority\":0\n}"
+				},
+				"url": {
+					"raw": "{{url}}/job",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"job"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update Job",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"connection": true,
+					"accept-encoding": true,
+					"user-agent": true,
+					"content-type": true,
+					"host": true
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"submitter_id\": \"2\",\n    \"command\": \"sleep 4\",\n    \"priority\": 9\n}"
+				},
+				"url": {
+					"raw": "{{url}}/job/6",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"job",
+						"6"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"protocolProfileBehavior": {}
+}
