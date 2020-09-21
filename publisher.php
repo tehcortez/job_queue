@@ -67,16 +67,24 @@ class RabbitPublisher
 
         $job_id = 0;
         while (true) {
+            $command = 'sleep ' . rand(0, 3);
+            $priority = rand(0, 9);
+            
+            $stmt = $this->db->query("INSERT INTO job_list "
+                . "(submitter_id, command, priority) VALUES (?, ?, ?);");
+            $stmt->execute([
+                1,
+                $command,
+                $priority
+            ]);
+            
+            $job_id = $this->db->getDriver()->getLastGeneratedValue();
+            
             $jobArray = array(
-                'id' => $job_id++,
-                'command' => 'sleep ' . rand(0, 3)
+                'id' => $job_id,
+                'command' => $command,
+                'priority' => $priority
             );
-
-            if ($job_id % 2 == 1) {
-                $priority = 9;
-            } else {
-                $priority = 0;
-            }
 
             $msg = new AMQPMessage(
                 json_encode($jobArray, JSON_UNESCAPED_SLASHES),

@@ -11,11 +11,13 @@ require_once __DIR__ . '/vendor/autoload.php';
 
 class RabbitWorker
 {
+
     private $db;
     private $serviceManager;
     private $rabbitMQConfig;
+    private $workerId;
 
-    public function __construct()
+    public function __construct($workerName)
     {
         $configuration = [];
         foreach (Glob::glob('config/{{*}}{{,*.local}}.php', Glob::GLOB_BRACE) as $file) {
@@ -34,6 +36,20 @@ class RabbitWorker
         $this->serviceManager->get('ModuleManager')->loadModules();
         $this->db = $this->serviceManager->get('DBJobQueue');
         $this->rabbitMQConfig = $this->serviceManager->get('Config')['rabbitmq'];
+
+        $this->workerId = null;
+        $stmt = $this->db->query("SELECT id FROM processors WHERE name = ?");
+        $processorResults = $stmt->execute([$workerName]);
+        foreach ($processorResults as $processorResult) {
+            $this->workerId = $processorResult['id'];
+        }
+        if (!isset($this->workerId)) {
+            $stmt = $this->db->query("INSERT INTO processors "
+                . "(name) VALUES (?)");
+            $stmt->execute([$workerName]);
+
+            $this->workerId = $this->db->getDriver()->getLastGeneratedValue();
+        }
     }
 
     public function work()
@@ -55,22 +71,36 @@ class RabbitWorker
             $exclusive = false,
             $auto_delete = false,
             $nowait = false,
-        //    $arguments = null,
+            //    $arguments = null,
             new AMQPTable(array(
                 "x-max-priority" => 10
-            )),
+                )),
             $ticket = null
         );
 
 
         echo ' [*] Waiting for messages. To exit press CTRL+C', "\n";
 
-        $callback = function($msg){
+        $callback = function($msg) {
             echo " [x] Received ", $msg->body, "\n";
-            $job = json_decode($msg->body, $assocForm=true);
-            $output = shell_exec($job['command']);
+            $job = json_decode($msg->body, $assocForm = true);
+            $stmt = $this->db->query("SELECT command FROM job_list "
+                . "WHERE id = ?");
+            $results = $stmt->execute([$job['id']]);
+            foreach ($results as $result) {
+                $command = $result['command'];
+            }
+
+            $output = shell_exec($command);
             echo " Output: $output \n";
-        //    sleep($job['sleep_period']);
+
+            $stmt = $this->db->query("UPDATE job_list "
+                . "SET processor_id=?, executed_at=CURRENT_TIMESTAMP WHERE id = ?");
+            $results = $stmt->execute([
+                $this->workerId,
+                $job['id']
+            ]);
+
             echo " [x] Done", "\n";
             $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
         };
@@ -87,8 +117,7 @@ class RabbitWorker
             $callback
         );
 
-        while (count($channel->callbacks))
-        {
+        while (count($channel->callbacks)) {
             $channel->wait();
         }
 
@@ -97,5 +126,14 @@ class RabbitWorker
     }
 }
 
-$rabbitWorker = new RabbitWorker();
-$rabbitWorker->work();
+if (isset($argv[1])) {
+    echo ' Worker name is: '.$argv[1], "\n";
+	$rabbitWorker = new RabbitWorker($argv[1]);
+    $rabbitWorker->work();
+}
+else {
+	echo "Please provide a processor name \n";
+}
+die;
+
+
