@@ -188,6 +188,19 @@ return [
                         'name' => \Laminas\Validator\NotEmpty::class,
                         'options' => [],
                     ],
+                    2 => [
+                        'name' => \Laminas\Validator\LessThan::class,
+                        'options' => [
+                            'max' => '10',
+                        ],
+                    ],
+                    3 => [
+                        'name' => \Laminas\Validator\GreaterThan::class,
+                        'options' => [
+                            'min' => '0',
+                            'inclusive' => true,
+                        ],
+                    ],
                 ],
                 'filters' => [],
                 'name' => 'priority',
@@ -199,6 +212,7 @@ return [
         'factories' => [
             \jobqueue\V1\Rest\Submitter\SubmitterResource::class => \jobqueue\V1\Rest\Submitter\SubmitterResourceFactory::class,
             \jobqueue\V1\Rest\Job\JobResource::class => \jobqueue\V1\Rest\Job\JobResourceFactory::class,
+            \jobqueue\V1\Rest\Job\JobQueue::class => \jobqueue\V1\Rest\Job\JobQueueFactory::class,
         ],
     ],
     'api-tools-rest' => [

@@ -3,6 +3,7 @@ namespace jobqueue;
 
 use jobqueue\V1\Rest\Job\JobEntity;
 use jobqueue\V1\Rest\Job\JobMapper;
+use jobqueue\V1\Rest\Job\JobQueue;
 use jobqueue\V1\Rest\Submitter\SubmitterEntity;
 use jobqueue\V1\Rest\Submitter\SubmitterMapper;
 use Laminas\ApiTools\Provider\ApiToolsProviderInterface;
@@ -38,8 +39,17 @@ class Module implements ApiToolsProviderInterface
                 },
                 'jobqueue\V1\Rest\Job\JobMapper' => function($sm) {
                     $tableGateway = $sm->get('JobsTableGateway');
-                    return new JobMapper($tableGateway);
+                    $jobQueue = $sm->get(JobQueue::class);
+                    return new JobMapper($tableGateway, $jobQueue);
                 }
+//                'jobqueue\V1\Rest\Job\JobQueue' => function($sm) {
+//                    $rabbitMQConfig = $sm->get('Config')['rabbitmq'];
+//                    return new JobQueue($rabbitMQConfig);
+//                },
+//                JobQueue::class => function($sm) {
+//                    $rabbitMQConfig = $sm->get('Config')['rabbitmq'];
+//                    return new JobQueue($rabbitMQConfig);
+//                }
             )
         );
     }

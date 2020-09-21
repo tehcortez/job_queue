@@ -121,6 +121,13 @@ class JobResource extends AbstractResourceListener
      */
     public function update($id, $data)
     {
-        return new ApiProblem(405, 'The PUT method has not been defined for individual resources');
+        $jobEntity = new JobEntity();
+        $jobEntity->id = $id;
+        $jobEntity->submitterId = $data->submitter_id;
+        $jobEntity->command = $data->command;
+        $jobEntity->priority = $data->priority;
+        
+        return $this->mapper->saveJob($jobEntity);
+//        return new ApiProblem(405, 'The PUT method has not been defined for individual resources');
     }
 }

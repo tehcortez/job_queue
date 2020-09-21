@@ -57,8 +57,6 @@ class RabbitPublisher
             $exclusive = false,
             $auto_delete = false,
             $nowait = false,
-            //    $arguments = array("x-max-priority" => 10),
-            //    $arguments = null,
             new AMQPTable(array(
                 "x-max-priority" => 10
                 )),

@@ -1,6 +1,7 @@
 <?php
 namespace jobqueue\V1\Rest\Submitter;
 
+use Laminas\ApiTools\ApiProblem\ApiProblem;
 use Laminas\Db\TableGateway\TableGateway;
 
 class SubmitterMapper
@@ -25,7 +26,7 @@ class SubmitterMapper
         $rowset = $this->tableGateway->select(['id' => $id]);
         $row = $rowset->current();
         if (!$row) {
-            throw new Exception('Did not find submitter with id ' . $id);
+            return new ApiProblem(400, 'Did not find submitter with id ' . $id);
         }
         return $row;
     }
@@ -44,9 +45,11 @@ class SubmitterMapper
             $submitter->id = $this->tableGateway->lastInsertValue;
             return $submitter;
         } else {
-            if ($this->fetchOne($id)) {
+            if ($this->fetchOne($id) instanceof SubmitterEntity) {
                 $this->tableGateway->update($data, ['id' => $id]);
                 return $submitter;
+            } else {
+                return new ApiProblem(400, 'Did not find submitter with id ' . $id);
             }
         }
     }
