@@ -26,12 +26,22 @@ return [
                     ],
                 ],
             ],
+            'jobqueue.rest.job' => [
+                'type' => 'Segment',
+                'options' => [
+                    'route' => '/job[/:job_id]',
+                    'defaults' => [
+                        'controller' => 'jobqueue\\V1\\Rest\\Job\\Controller',
+                    ],
+                ],
+            ],
         ],
     ],
     'api-tools-versioning' => [
         'uri' => [
             0 => 'jobqueue.rpc.ping',
             1 => 'jobqueue.rest.submitter',
+            2 => 'jobqueue.rest.job',
         ],
     ],
     'api-tools-rpc' => [
@@ -47,6 +57,7 @@ return [
         'controllers' => [
             'jobqueue\\V1\\Rpc\\Ping\\Controller' => 'Json',
             'jobqueue\\V1\\Rest\\Submitter\\Controller' => 'HalJson',
+            'jobqueue\\V1\\Rest\\Job\\Controller' => 'HalJson',
         ],
         'accept_whitelist' => [
             'jobqueue\\V1\\Rpc\\Ping\\Controller' => [
@@ -55,6 +66,11 @@ return [
                 2 => 'application/*+json',
             ],
             'jobqueue\\V1\\Rest\\Submitter\\Controller' => [
+                0 => 'application/vnd.jobqueue.v1+json',
+                1 => 'application/hal+json',
+                2 => 'application/json',
+            ],
+            'jobqueue\\V1\\Rest\\Job\\Controller' => [
                 0 => 'application/vnd.jobqueue.v1+json',
                 1 => 'application/hal+json',
                 2 => 'application/json',
@@ -69,6 +85,10 @@ return [
                 0 => 'application/vnd.jobqueue.v1+json',
                 1 => 'application/json',
             ],
+            'jobqueue\\V1\\Rest\\Job\\Controller' => [
+                0 => 'application/vnd.jobqueue.v1+json',
+                1 => 'application/json',
+            ],
         ],
     ],
     'api-tools-content-validation' => [
@@ -77,6 +97,9 @@ return [
         ],
         'jobqueue\\V1\\Rest\\Submitter\\Controller' => [
             'input_filter' => 'jobqueue\\V1\\Rest\\Submitter\\Validator',
+        ],
+        'jobqueue\\V1\\Rest\\Job\\Controller' => [
+            'input_filter' => 'jobqueue\\V1\\Rest\\Job\\Validator',
         ],
     ],
     'input_filter_specs' => [
@@ -125,10 +148,57 @@ return [
                 'description' => 'E-mail of submitter',
             ],
         ],
+        'jobqueue\\V1\\Rest\\Job\\Validator' => [
+            0 => [
+                'required' => true,
+                'validators' => [
+                    0 => [
+                        'name' => \Laminas\Validator\NotEmpty::class,
+                        'options' => [],
+                    ],
+                    1 => [
+                        'name' => \Laminas\Validator\Digits::class,
+                        'options' => [],
+                    ],
+                ],
+                'filters' => [],
+                'name' => 'submitter_id',
+                'description' => 'id of submitter sending command',
+            ],
+            1 => [
+                'required' => true,
+                'validators' => [
+                    0 => [
+                        'name' => \Laminas\Validator\NotEmpty::class,
+                        'options' => [],
+                    ],
+                ],
+                'filters' => [],
+                'name' => 'command',
+                'description' => 'Command to be executed by server',
+            ],
+            2 => [
+                'required' => true,
+                'validators' => [
+                    0 => [
+                        'name' => \Laminas\Validator\Digits::class,
+                        'options' => [],
+                    ],
+                    1 => [
+                        'name' => \Laminas\Validator\NotEmpty::class,
+                        'options' => [],
+                    ],
+                ],
+                'filters' => [],
+                'name' => 'priority',
+                'description' => 'Priority of job',
+            ],
+        ],
     ],
     'service_manager' => [
         'factories' => [
             \jobqueue\V1\Rest\Submitter\SubmitterResource::class => \jobqueue\V1\Rest\Submitter\SubmitterResourceFactory::class,
+            \jobqueue\V1\Rest\Job\JobResource::class => \jobqueue\V1\Rest\Job\JobResourceFactory::class,
         ],
     ],
     'api-tools-rest' => [
@@ -154,6 +224,28 @@ return [
             'collection_class' => \jobqueue\V1\Rest\Submitter\SubmitterCollection::class,
             'service_name' => 'Submitter',
         ],
+        'jobqueue\\V1\\Rest\\Job\\Controller' => [
+            'listener' => \jobqueue\V1\Rest\Job\JobResource::class,
+            'route_name' => 'jobqueue.rest.job',
+            'route_identifier_name' => 'job_id',
+            'collection_name' => 'job',
+            'entity_http_methods' => [
+                0 => 'GET',
+                1 => 'PATCH',
+                2 => 'PUT',
+                3 => 'DELETE',
+            ],
+            'collection_http_methods' => [
+                0 => 'GET',
+                1 => 'POST',
+            ],
+            'collection_query_whitelist' => [],
+            'page_size' => 25,
+            'page_size_param' => null,
+            'entity_class' => \jobqueue\V1\Rest\Job\JobEntity::class,
+            'collection_class' => \jobqueue\V1\Rest\Job\JobCollection::class,
+            'service_name' => 'job',
+        ],
     ],
     'api-tools-hal' => [
         'metadata_map' => [
@@ -167,6 +259,18 @@ return [
                 'entity_identifier_name' => 'id',
                 'route_name' => 'jobqueue.rest.submitter',
                 'route_identifier_name' => 'submitter_id',
+                'is_collection' => true,
+            ],
+            \jobqueue\V1\Rest\Job\JobEntity::class => [
+                'entity_identifier_name' => 'id',
+                'route_name' => 'jobqueue.rest.job',
+                'route_identifier_name' => 'job_id',
+                'hydrator' => \Laminas\Hydrator\ArraySerializable::class,
+            ],
+            \jobqueue\V1\Rest\Job\JobCollection::class => [
+                'entity_identifier_name' => 'id',
+                'route_name' => 'jobqueue.rest.job',
+                'route_identifier_name' => 'job_id',
                 'is_collection' => true,
             ],
         ],

@@ -23,13 +23,4 @@ class SubmitterEntity
         $this->name = $array['name'];
         $this->email = $array['email'];
     }
-
-//    public function toArray(): array
-//    {
-//        return [
-//            'id' => $this->id,
-//            'name' => $this->name,
-//            'email' => $this->email
-//        ];
-//    }
 }

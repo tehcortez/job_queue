@@ -1,15 +1,15 @@
 <?php
-namespace jobqueue\V1\Rest\Submitter;
+namespace jobqueue\V1\Rest\Job;
 
 use Laminas\ApiTools\ApiProblem\ApiProblem;
 use Laminas\ApiTools\Rest\AbstractResourceListener;
 
-class SubmitterResource extends AbstractResourceListener
+class JobResource extends AbstractResourceListener
 {
 
     protected $mapper;
 
-    public function __construct(SubmitterMapper $mapper)
+    public function __construct(JobMapper $mapper)
     {
         $this->mapper = $mapper;
     }
@@ -22,11 +22,13 @@ class SubmitterResource extends AbstractResourceListener
      */
     public function create($data)
     {
-        $submitterEntity = new SubmitterEntity();
-        $submitterEntity->name = $data->name;
-        $submitterEntity->email = $data->email;
-
-        return $this->mapper->saveSubmitter($submitterEntity);
+//        var_dump($data);die;
+        $jobEntity = new JobEntity();
+        $jobEntity->submitterId = $data->submitter_id;
+        $jobEntity->command = $data->command;
+        $jobEntity->priority = $data->priority;
+        
+        return $this->mapper->saveJob($jobEntity);
 //        return new ApiProblem(405, 'The POST method has not been defined');
     }
 
@@ -38,11 +40,7 @@ class SubmitterResource extends AbstractResourceListener
      */
     public function delete($id)
     {
-        if ($this->mapper->deleteSubmitter($id)) {
-            return true;
-        }
-        return new ApiProblem(405, 'Not possible to delete submitter with id ' . $id);
-//        return new ApiProblem(405, 'The DELETE method has not been defined for individual resources');
+        return new ApiProblem(405, 'The DELETE method has not been defined for individual resources');
     }
 
     /**
@@ -123,12 +121,6 @@ class SubmitterResource extends AbstractResourceListener
      */
     public function update($id, $data)
     {
-        $submitterEntity = new SubmitterEntity();
-        $submitterEntity->id = $id;
-        $submitterEntity->name = $data->name;
-        $submitterEntity->email = $data->email;
-
-        return $this->mapper->saveSubmitter($submitterEntity);
-//        return new ApiProblem(405, 'The PUT method has not been defined for individual resources');
+        return new ApiProblem(405, 'The PUT method has not been defined for individual resources');
     }
 }

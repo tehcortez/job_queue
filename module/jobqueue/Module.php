@@ -1,6 +1,8 @@
 <?php
 namespace jobqueue;
 
+use jobqueue\V1\Rest\Job\JobEntity;
+use jobqueue\V1\Rest\Job\JobMapper;
 use jobqueue\V1\Rest\Submitter\SubmitterEntity;
 use jobqueue\V1\Rest\Submitter\SubmitterMapper;
 use Laminas\ApiTools\Provider\ApiToolsProviderInterface;
@@ -27,6 +29,16 @@ class Module implements ApiToolsProviderInterface
                 'jobqueue\V1\Rest\Submitter\SubmitterMapper' => function($sm) {
                     $tableGateway = $sm->get('JobSubmitterTableGateway');
                     return new SubmitterMapper($tableGateway);
+                },
+                'JobsTableGateway' => function($sm) {
+                    $dbAdapter = $sm->get('DBJobQueue');
+                    $resultSetPrototype = new ResultSet();
+                    $resultSetPrototype->setArrayObjectPrototype(new JobEntity());
+                    return new TableGateway('job_list', $dbAdapter, null, $resultSetPrototype);
+                },
+                'jobqueue\V1\Rest\Job\JobMapper' => function($sm) {
+                    $tableGateway = $sm->get('JobsTableGateway');
+                    return new JobMapper($tableGateway);
                 }
             )
         );

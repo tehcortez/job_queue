@@ -97,4 +97,98 @@ return [
             ],
         ],
     ],
+    'jobqueue\\V1\\Rest\\Job\\Controller' => [
+        'description' => 'Service responsible for jobs administration',
+        'collection' => [
+            'description' => 'Collection of job data',
+            'GET' => [
+                'description' => 'Gets list of jobs',
+                'response' => '{
+   "_links": {
+       "self": {
+           "href": "/job"
+       },
+       "first": {
+           "href": "/job?page={page}"
+       },
+       "prev": {
+           "href": "/job?page={page}"
+       },
+       "next": {
+           "href": "/job?page={page}"
+       },
+       "last": {
+           "href": "/job?page={page}"
+       }
+   }
+   "_embedded": {
+       "job": [
+           {
+               "_links": {
+                   "self": {
+                       "href": "/job[/:job_id]"
+                   }
+               }
+              "submitter_id": "id of submitter sending command",
+              "command": "Command to be executed by server",
+              "priority": "Priority of job"
+           }
+       ]
+   }
+}',
+            ],
+            'POST' => [
+                'description' => 'Create new job',
+                'request' => '{
+   "submitter_id": "id of submitter sending command",
+   "command": "Command to be executed by server",
+   "priority": "Priority of job"
+}',
+                'response' => '{
+   "_links": {
+       "self": {
+           "href": "/job[/:job_id]"
+       }
+   }
+   "submitter_id": "id of submitter sending command",
+   "command": "Command to be executed by server",
+   "priority": "Priority of job"
+}',
+            ],
+        ],
+        'entity' => [
+            'GET' => [
+                'description' => 'Gets specific job from app',
+                'response' => '{
+   "_links": {
+       "self": {
+           "href": "/job[/:job_id]"
+       }
+   }
+   "submitter_id": "id of submitter sending command",
+   "command": "Command to be executed by server",
+   "priority": "Priority of job"
+}',
+            ],
+            'description' => 'Job entity',
+            'DELETE' => [
+                'description' => 'Remove job from app',
+                'request' => '{
+   "submitter_id": "id of submitter sending command",
+   "command": "Command to be executed by server",
+   "priority": "Priority of job"
+}',
+                'response' => '{
+   "_links": {
+       "self": {
+           "href": "/job[/:job_id]"
+       }
+   }
+   "submitter_id": "id of submitter sending command",
+   "command": "Command to be executed by server",
+   "priority": "Priority of job"
+}',
+            ],
+        ],
+    ],
 ];
